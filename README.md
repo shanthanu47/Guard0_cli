@@ -11,7 +11,6 @@ VulnBot is an intelligent CLI chatbot that helps security researchers query CVE 
 - [API Integrations](#api-integrations)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Architecture Comparison](#architecture-comparison)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
 
@@ -162,62 +161,6 @@ python -m src.server
 
 Then connect from Claude Desktop or other MCP clients.
 
-## Architecture Comparison
-
-| Feature | Monolithic | Pure MCP | Hybrid |
-|---------|-----------|----------|--------|
-| CLI Interface | Yes | No | Yes |
-| MCP Compatibility | No | Yes | Yes |
-| Reusable Tools | No | Yes | Yes |
-| Context Retention | Yes | Client-dependent | Yes |
-| Ease of Development | High | Medium | Medium |
-| Production Ready | Medium | Medium | High |
-| Best For | Prototyping | Integration | End Users |
-
-### Detailed Comparison
-
-#### Version 1: Monolithic Agent
-
-**Pros**:
-- Simple architecture
-- Fast execution
-- Easy to understand
-
-**Cons**:
-- Tools locked into one application
-- Cannot integrate with external clients
-- Poor separation of concerns
-
-**Use Case**: Quick prototypes, learning projects
-
-#### Version 2: Pure MCP Server
-
-**Pros**:
-- Universal MCP client compatibility
-- Clean tool abstraction
-- Industry-standard protocol
-
-**Cons**:
-- No built-in user interface
-- Requires external client for interaction
-- More complex debugging
-
-**Use Case**: Tool libraries, enterprise integrations
-
-#### Version 3: Hybrid Approach
-
-**Pros**:
-- Best of both worlds
-- Production-ready chatbot
-- MCP-compatible for extensibility
-- Simplified architecture
-
-**Cons**:
-- Requires understanding of ReAct pattern
-- Multiple deployment modes to maintain
-
-**Use Case**: This project's chosen architecture - provides both a usable CLI and demonstrates MCP compatibility.
-
 ## Project Structure
 
 ```
@@ -259,28 +202,3 @@ python -c "from src.tools.nvd import nvd_client; print(nvd_client.get_cve('CVE-2
 # Test MITRE search
 python -c "from src.tools.mitre import mitre_tool; print(mitre_tool.search_techniques('phishing'))"
 ```
-
-## Assignment Context
-
-This project demonstrates:
-
-1. MCP Architecture Understanding: src/server.py implements Model Context Protocol
-2. Tool Integration: Both NVD REST API and MITRE database queries
-3. Production Quality: Includes error handling, caching, and testing
-4. Architectural Evolution: Shows progression from monolithic to MCP to hybrid
-
-The Hybrid Approach was chosen because it:
-- Meets the CLI Chatbot requirement
-- Demonstrates MCP architecture capability
-- Provides a deployable end product
-- Shows understanding of appropriate pattern selection
-
-## License
-
-MIT License
-
-## Acknowledgments
-
-- Anthropic MCP - Protocol specification
-- NVD API - Vulnerability data
-- MITRE ATT&CK - Threat intelligence framework
