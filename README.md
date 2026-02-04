@@ -153,6 +153,13 @@ Run the server for use with MCP clients (like Claude Desktop) or integration tes
 python -m src.server
 ```
 
+**Manual Interaction:**
+Since V2 is a "headless" server, we included a custom client so you can manually interact with it:
+
+```bash
+python run_v2_manual.py
+```
+
 Or run the verification suite:
 ```bash
 python tests/test_mcp_integration.py
