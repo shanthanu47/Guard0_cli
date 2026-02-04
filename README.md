@@ -139,44 +139,50 @@ See SETUP.md for detailed installation instructions.
 
 ## Usage
 
-### Option A: Hybrid CLI (Recommended)
+### 1. Hybrid CLI (Version 3 - Recommended)
+The default mode with Mac Terminal UI and typing animations.
 
 ```bash
 python -m src.main start
 ```
 
-Example conversation:
-```
-You > What is CVE-2021-44228?
-Bot > [Fetches from NVD and explains Log4Shell]
-You > What's the CVSS score?
-Bot > [Remembers context, extracts score]
-```
-
-### Option B: Pure MCP Server
+### 2. Pure MCP Server (Version 2)
+Run the server for use with MCP clients (like Claude Desktop) or integration tests.
 
 ```bash
 python -m src.server
 ```
 
-Then connect from Claude Desktop or other MCP clients.
+Or run the verification suite:
+```bash
+python tests/test_mcp_integration.py
+```
+
+### 3. Monolithic Agent (Version 1 - Legacy)
+Run the legacy agent architecture for comparison.
+
+```bash
+python run_v1_demo.py
+```
 
 ## Project Structure
 
 ```
 Guard0_cli/
 ├── src/
-│   ├── main.py              # Hybrid CLI client
-│   ├── server.py            # MCP server
+│   ├── main.py              # Version 3: Hybrid CLI client
+│   ├── server.py            # Version 2: MCP server
+│   ├── agent.py             # Version 1: Legacy agent logic
 │   ├── db.py                # Database utilities
 │   ├── build_db.py          # MITRE database builder
-│   └── tools/
-│       ├── nvd.py           # NVD API client
-│       └── mitre.py         # MITRE ATT&CK queries
+│   └── tools/               # Shared Tools
+│       ├── nvd.py
+│       └── mitre.py
 ├── tests/
 │   └── test_mcp_integration.py
+├── run_v1_demo.py           # Script to run Version 1
 ├── data/
-│   └── mitre.db             # SQLite database
+│   └── mitre.db
 ├── pyproject.toml
 ├── requirements.txt
 ├── .env.example
@@ -202,3 +208,4 @@ python -c "from src.tools.nvd import nvd_client; print(nvd_client.get_cve('CVE-2
 # Test MITRE search
 python -c "from src.tools.mitre import mitre_tool; print(mitre_tool.search_techniques('phishing'))"
 ```
+
