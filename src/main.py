@@ -2,13 +2,19 @@ import typer
 import json
 import os
 import re
+import time
+import random
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+from rich.live import Live
+from rich.text import Text
+from rich import box
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 from openai import OpenAI
 
+# Import the SAME tools the MCP server uses
 from src.tools.nvd import nvd_client
 from src.tools.mitre import mitre_tool
 from src.build_db import download_data, build_database
@@ -18,14 +24,16 @@ load_dotenv()
 app = typer.Typer()
 console = Console()
 
+# Configuration
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-MODEL = os.getenv("OPENROUTER_MODEL", "deepseek/deepseek-r1:free")
+MODEL = os.getenv("OPENROUTER_MODEL", "google/gemini-2.0-flash-001")
 
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
     api_key=OPENROUTER_API_KEY,
 )
 
+# Tool Definitions
 TOOLS_SCHEMA = [
     {
         "name": "get_cve",
@@ -63,16 +71,18 @@ TOOLS_SCHEMA = [
 ]
 
 SYSTEM_PROMPT = f"""
-You are a Cyber Security Analyst Assistant CLI.
+You are Guard0, an elite Cybersecurity Intelligence AI.
 You have access to the following tools:
 {json.dumps(TOOLS_SCHEMA, indent=2)}
 
+## Instructions
 1. Answer the user's question accurately using the provided tools.
 2. You operate in a **Reason + Act** loop.
 3. For EVERY step, output your thought process, followed by one of two actions:
     a) **Execute Tool**: Output a JSON block to call a tool.
     b) **Final Answer**: Output the final response to the user.
 
+## Format
 To call a tool, use this EXACT format (markdown code block):
 ```json
 {{
@@ -90,6 +100,13 @@ To provide the answer, use this format:
 }}
 ```
 """
+
+def type_text(text: str, style: str = "white", speed: float = 0.005):
+    """Simulates typing effect."""
+    for char in text:
+        console.print(char, style=style, end="")
+        time.sleep(speed)
+    console.print() # Newline
 
 def execute_tool(tool_name: str, args: dict):
     """Executes the tool locally (Hybrid Pattern)."""
@@ -197,15 +214,33 @@ def init():
 @app.command()
 def start():
     """Start the CLI Chatbot."""
-    console.print(Panel.fit("🛡️  VulnBot Hybrid Client  🛡️", style="bold cyan"))
     
+    # Mac Terminal Style Header
+    header = Panel(
+        Text("Guard0 Intelligence Terminal v3.0", justify="center", style="bold white"),
+        title="🔴 🟡 🟢  guard0-cli — -zsh — 80x24",
+        border_style="white",
+        box=box.ROUNDED,
+        padding=(1, 2)
+    )
+    console.print(header)
+    console.print()
+    
+    # Init history with system prompt
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    
+    type_text("Initializing secure connection...", speed=0.02)
+    time.sleep(0.3)
+    type_text("Connected to Guard0 Core.", speed=0.02, style="green")
+    console.print()
     
     while True:
         try:
-            text = console.input("\n[bold green]You > [/bold green]")
+            # Custom prompt style
+            text = console.input("[bold cyan]➜  ~ [/bold cyan]")
+            
             if text.lower() in ["exit", "quit", "q"]:
-                console.print("[yellow]Goodbye![/yellow]")
+                console.print("[yellow]Terminating session...[/yellow]")
                 break
             
             chat_loop(text, messages)
