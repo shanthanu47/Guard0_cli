@@ -10,23 +10,30 @@ console = Console()
 
 def main():
     console.print(Panel("🛡️  Version 1: Monolithic Agent (Legacy)  🛡️", style="bold red"))
+    print("Type 'exit' to quit.\n")
     
-    query = "What is CVE-2021-44228?"
-    print(f"\nUser Query: {query}\n")
-    
-    print("--- Agent Execution Trace ---")
-    try:
-        generator = agent.chat(query)
-        for event_type, content in generator:
-            if event_type == "final":
-                print(f"\n[FINAL ANSWER]\n{content}")
-            elif event_type in ["log", "debug"]:
-                print(f"[{event_type.upper()}] {content}")
-            elif event_type == "error":
-                print(f"[ERROR] {content}")
+    while True:
+        try:
+            query = console.input("[bold red]V1 User > [/bold red]")
+            if query.lower() in ["exit", "quit"]:
+                break
                 
-    except Exception as e:
-        print(f"Error running V1: {e}")
+            print("\n--- Agent Execution Trace ---")
+            generator = agent.chat(query)
+            for event_type, content in generator:
+                if event_type == "final":
+                    print(f"\n[FINAL ANSWER]\n{content}")
+                elif event_type in ["log", "debug"]:
+                    # print(f"[{event_type.upper()}] {content}") # Uncomment for verbose debugging
+                    pass
+                elif event_type == "error":
+                    print(f"[ERROR] {content}")
+            print("-" * 30 + "\n")
+                    
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            print(f"Error running V1: {e}")
 
 if __name__ == "__main__":
     main()
