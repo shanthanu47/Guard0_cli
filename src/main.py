@@ -127,7 +127,7 @@ def chat_loop(user_input: str, messages: List[Dict]):
     messages.append({"role": "user", "content": user_input})
     
     step_count = 0
-    MAX_STEPS = 5
+    MAX_STEPS = 8
     
     while step_count < MAX_STEPS:
         try:
@@ -189,6 +189,9 @@ def chat_loop(user_input: str, messages: List[Dict]):
         except Exception as e:
             console.print(f"[red]System Error: {str(e)}[/red]")
             return
+            
+    # Fallback if loop finishes without final answer
+    console.print(Panel("I apologize, but I couldn't reach a definitive conclusion within the step limit. Please try refining your query.", title="[bold yellow]Limit Reached[/bold yellow]", border_style="yellow", box=box.ROUNDED))
 
 def parse_json_action(text: str):
     """Robust JSON extractor."""

@@ -9,15 +9,22 @@ class MitreTool:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        # Simple text search
+        # Weighted search: Prioritize Name/ID matches over Description matches
         sql = """
             SELECT mitre_id, name, description, platforms 
             FROM techniques 
             WHERE name LIKE ? OR mitre_id LIKE ? OR description LIKE ?
+            ORDER BY 
+              CASE 
+                WHEN mitre_id LIKE ? THEN 1 
+                WHEN name LIKE ? THEN 2 
+                ELSE 3 
+              END
             LIMIT 5
         """
         wildcard = f"%{query}%"
-        cursor.execute(sql, (wildcard, wildcard, wildcard))
+        # Params: WHERE clause (3) + ORDER BY clause (2)
+        cursor.execute(sql, (wildcard, wildcard, wildcard, wildcard, wildcard))
         rows = cursor.fetchall()
         
         results = []
