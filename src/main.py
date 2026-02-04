@@ -114,53 +114,63 @@ def chat_loop(user_input: str, messages: List[Dict]):
     
     while step_count < MAX_STEPS:
         try:
-            response = client.chat.completions.create(
-                model=MODEL,
-                messages=messages,
-                temperature=0.1
-            )
+            # 1. Get LLM Response
+            with console.status("[bold cyan]Guard0 AI is processing...[/bold cyan]", spinner="dots2"):
+                response = client.chat.completions.create(
+                    model=MODEL,
+                    messages=messages,
+                    temperature=0.1
+                )
             
             if not response or not response.choices:
-                 console.print("[red]Error: Empty response from LLM.[/red]")
+                 console.print("[red]Error: Empty response from Neural Core.[/red]")
                  return
 
             content = response.choices[0].message.content
             messages.append({"role": "assistant", "content": content})
             
-
+            # 2. Parse Action
             action_data = parse_json_action(content)
             
             if not action_data:
-                console.print(Markdown(content))
+                # Assume final answer if no JSON found
+                console.print(Panel(Markdown(content), title="[bold green]Guard0[/bold green]", border_style="green", box=box.ROUNDED))
                 return 
 
             action_type = action_data.get("action")
             
             if action_type == "final_answer":
-                console.print(Markdown(action_data.get("content", "")))
+                final_content = action_data.get("content", "")
+                
+                # Typing effect for final answer
+                console.print() # Spacer
+                panel = Panel(Markdown(final_content), title="[bold green]Guard0[/bold green]", border_style="green", box=box.ROUNDED)
+                console.print(panel)
                 return
             
             elif action_type == "execute_tool":
                 tool_name = action_data.get("tool_name")
                 args = action_data.get("arguments", {})
                 
-                console.print(f"[bold cyan]🛠️  Using Tool: {tool_name}[/bold cyan] [dim]{json.dumps(args)}[/dim]")
+                console.print(f"[dim cyan]⚡ Executing Protocol: {tool_name}[/dim cyan]")
                 
-                result = execute_tool(tool_name, args)
+                with console.status(f"[bold dim]Running {tool_name}...[/bold dim]", spinner="line"):
+                    result = execute_tool(tool_name, args)
+                    time.sleep(0.5) # Fake delay for 'feel'
                 
+                # Truncate long results for display
                 result_str = json.dumps(result)
-                display_str = (result_str[:200] + '...') if len(result_str) > 200 else result_str
-                console.print(f"[dim]Result: {display_str}[/dim]")
                 
+                # Feed back to LLM
                 messages.append({"role": "user", "content": f"Observation: {result_str}"})
                 step_count += 1
             
             else:
-                 console.print(f"[red]Unknown action: {action_type}[/red]")
+                 console.print(f"[red]Unknown directive: {action_type}[/red]")
                  return
 
         except Exception as e:
-            console.print(f"[red]Error: {str(e)}[/red]")
+            console.print(f"[red]System Error: {str(e)}[/red]")
             return
 
 def parse_json_action(text: str):
@@ -179,10 +189,10 @@ def parse_json_action(text: str):
 @app.command()
 def init():
     """Initializes the database."""
-    console.print(Panel("Initializing Data...", style="bold magenta"))
+    console.print(Panel("Initializing Guard0 Knowledge Base...", style="bold magenta", box=box.ROUNDED))
     download_data()
     build_database()
-    console.print("[green]Done![/green]")
+    console.print("[green]Initialization Complete.[/green]")
 
 @app.command()
 def start():
